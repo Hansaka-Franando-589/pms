@@ -5,30 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Information System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
-    // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCbYg21T8dFRDAqCJegcGd8sTrppgljEAo",
-  authDomain: "pms-application-4d101.firebaseapp.com",
-  databaseURL: "https://pms-application-4d101-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "pms-application-4d101",
-  storageBucket: "pms-application-4d101.firebasestorage.app",
-  messagingSenderId: "602606496393",
-  appId: "1:602606496393:web:42bf905eba13c27750f458",
-  measurementId: "G-9SE6DJHL7K"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-</script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -1086,330 +1064,333 @@ const analytics = getAnalytics(app);
     </div>
 
     <script>
-    // Firebase ආරම්භ කරන්න
-    firebase.initializeApp(firebaseConfig);
-    // database එකට අදාළ reference එකක් සාදන්න
-    const db = firebase.database();
-    
-    // studentsData array එක ගෝලීය වශයෙන් තබන්න, එය database එකෙන් data ලැබෙන විට යාවත්කාලීන වේ
-    let studentsData = [];
 
-    const ADMIN_PASSWORD = "admin123"; // ඔබේ admin password එක මෙහි වෙනස් කරන්න
+    // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-    function toggleAdmin() {
-        const studentSection = document.getElementById('studentSection');
-        const adminPanel = document.getElementById('adminPanel');
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCbYg21T8dFRDAqCJegcGd8sTrppgljEAo",
+  authDomain: "pms-application-4d101.firebaseapp.com",
+  databaseURL: "https://pms-application-4d101-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "pms-application-4d101",
+  storageBucket: "pms-application-4d101.firebasestorage.app",
+  messagingSenderId: "602606496393",
+  appId: "1:602606496393:web:42bf905eba13c27750f458",
+  measurementId: "G-9SE6DJHL7K"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
         
-        if (studentSection.style.display === 'none') {
-            studentSection.style.display = 'block';
-            adminPanel.style.display = 'none';
-        } else {
-            studentSection.style.display = 'none';
-            adminPanel.style.display = 'block';
-        }
-    }
+        const ADMIN_PASSWORD = "admin123"; // Change your admin password here
+        let studentsData = JSON.parse(localStorage.getItem('studentsData')) || [];
 
-    function backToStudentForm() {
-        document.getElementById('studentSection').style.display = 'block';
-        document.getElementById('adminPanel').style.display = 'none';
-        // Reset admin panel
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('adminDashboard').style.display = 'none';
-        document.getElementById('adminPassword').value = '';
-    }
-
-    function formatDateTime() {
-        const now = new Date();
-        const options = {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        };
-        return now.toLocaleString('en-US', options);
-    }
-
-    function getTodayDate() {
-        const today = new Date();
-        return today.toDateString();
-    }
-
-    function generateBarcodeId(prefectId) {
-        // Generate 6 random digits
-        let randomDigits = '';
-        for (let i = 0; i < 6; i++) {
-            randomDigits += Math.floor(Math.random() * 10);
-        }
-        return `${prefectId}-${randomDigits}`;
-    }
-
-    function showBarcodePopup(barcodeId) {
-        document.getElementById('generatedBarcode').textContent = barcodeId;
-        document.getElementById('barcodePopup').style.display = 'flex';
-    }
-
-    function closePopup() {
-        document.getElementById('barcodePopup').style.display = 'none';
-        document.getElementById('studentForm').reset();
-        // Hide copy success message
-        document.getElementById('copySuccess').classList.remove('show');
-    }
-
-    function copyBarcode() {
-        const barcodeText = document.getElementById('generatedBarcode').textContent;
-        
-        // Copy to clipboard
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(barcodeText).then(() => {
-                showCopySuccess();
-            }).catch(err => {
-                fallbackCopy(barcodeText);
-            });
-        } else {
-            fallbackCopy(barcodeText);
-        }
-    }
-
-    function fallbackCopy(text) {
-        // Fallback method for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-            document.execCommand('copy');
-            showCopySuccess();
-        } catch (err) {
-            alert('Barcode ID: ' + text + '\n\nPlease copy this manually.');
-        }
-        
-        document.body.removeChild(textArea);
-    }
-
-    function showCopySuccess() {
-        const successMsg = document.getElementById('copySuccess');
-        successMsg.classList.add('show');
-        
-        // Hide success message after 2 seconds
-        setTimeout(() => {
-            successMsg.classList.remove('show');
-        }, 2000);
-    }
-
-    document.getElementById('studentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        const dateTime = formatDateTime();
-        const prefectId = formData.get('prefect_unique_id');
-        const barcodeId = generateBarcodeId(prefectId);
-        
-        const studentData = {
-            // Firebase විසින් ස්වයංක්‍රීයව අද්විතීය ID එකක් සාදන නිසා අපට මෙය අවශ්‍ය නැත
-            name: formData.get('name'),
-            gender: formData.get('gender'),
-            class: formData.get('class'),
-            barcode_id: barcodeId,
-            destiny: formData.get('destiny') || 'N/A',
-            email: formData.get('email') || 'N/A',
-            phone: formData.get('phone') || 'N/A',
-            parents_phone: formData.get('parents_phone') || 'N/A',
-            current_duty: formData.get('current_duty') || 'N/A',
-            school_index_number: formData.get('school_index_number') || 'N/A',
-            prefect_unique_id: prefectId,
-            section: formData.get('section') || 'N/A',
-            dateTime: dateTime,
-            registrationDate: getTodayDate()
-        };
-
-        // data Firebase database එකට push කරන්න
-        db.ref('students').push(studentData)
-            .then(() => {
-                showBarcodePopup(barcodeId);
-                console.log("Data saved to Firebase successfully!");
-            })
-            .catch(error => {
-                console.error("Data could not be saved: " + error);
-                alert("දත්ත සුරැකීමේදී දෝෂයක් සිදුවිය. කරුණාකර නැවත උත්සාහ කරන්න.");
-            });
-    });
-
-    function login() {
-        const password = document.getElementById('adminPassword').value;
-        const errorDiv = document.getElementById('loginError');
-        
-        if (password === ADMIN_PASSWORD) {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('adminDashboard').style.display = 'block';
-            errorDiv.style.display = 'none';
+        function toggleAdmin() {
+            const studentSection = document.getElementById('studentSection');
+            const adminPanel = document.getElementById('adminPanel');
             
-            // Firebase වෙතින් real-time updates ලබා ගැනීමට on() method එක භාවිතා කරන්න
-            db.ref('students').on('value', (snapshot) => {
-                const studentsObject = snapshot.val();
-                studentsData = studentsObject ? Object.values(studentsObject) : [];
-                
-                updateAdminStats();
-                updateTable();
-            });
-        } else {
-            errorDiv.style.display = 'block';
+            if (studentSection.style.display === 'none') {
+                studentSection.style.display = 'block';
+                adminPanel.style.display = 'none';
+            } else {
+                studentSection.style.display = 'none';
+                adminPanel.style.display = 'block';
+            }
+        }
+
+        function backToStudentForm() {
+            document.getElementById('studentSection').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            // Reset admin panel
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminDashboard').style.display = 'none';
             document.getElementById('adminPassword').value = '';
         }
-    }
 
-    function updateAdminStats() {
-        const totalStudents = studentsData.length;
-        const todayDate = getTodayDate();
-        const todayCount = studentsData.filter(student => 
-            student.registrationDate === todayDate
-        ).length;
-
-        document.getElementById('totalStudents').textContent = totalStudents;
-        document.getElementById('todayCount').textContent = todayCount;
-    }
-
-    function updateTable() {
-        const tbody = document.getElementById('studentsTableBody');
-        tbody.innerHTML = '';
-        
-        if (studentsData.length === 0) {
-            const row = tbody.insertRow();
-            const cell = row.insertCell(0);
-            cell.colSpan = 14;
-            cell.textContent = 'තවම කිසිදු ශිෂ්‍ය තොරතුරක් ඇතුළත් කර නොමැත.';
-            cell.style.textAlign = 'center';
-            cell.style.padding = '2rem';
-            cell.style.color = 'var(--primary-maroon)';
-            cell.style.fontStyle = 'italic';
-            return;
+        function formatDateTime() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            };
+            return now.toLocaleString('en-US', options);
         }
-        
-        studentsData.forEach((student, index) => {
-            const row = tbody.insertRow();
-            row.insertCell(0).textContent = index + 1;
-            row.insertCell(1).textContent = student.name;
-            row.insertCell(2).textContent = student.gender || 'N/A';
-            row.insertCell(3).textContent = student.class;
-            row.insertCell(4).textContent = student.barcode_id;
-            row.insertCell(5).textContent = student.destiny;
-            row.insertCell(6).textContent = student.email;
-            row.insertCell(7).textContent = student.phone;
-            row.insertCell(8).textContent = student.parents_phone;
-            row.insertCell(9).textContent = student.current_duty;
-            row.insertCell(10).textContent = student.school_index_number;
-            row.insertCell(11).textContent = student.prefect_unique_id;
-            row.insertCell(12).textContent = student.section;
-            row.insertCell(13).textContent = student.dateTime;
-        });
-    }
 
-    function clearAllData() {
-        if (confirm('ඔබට සියලු ශිෂ්‍ය තොරතුරු මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද? මෙම ක්‍රියාව නැවත වෙනස් කළ නොහැක!')) {
-            // Firebase database එකේ "students" node එක මකා දමන්න
-            db.ref('students').remove()
-                .then(() => {
-                    alert('සියලු දත්ත සාර්ථකව මකා දමන ලදී.');
-                })
-                .catch(error => {
-                    console.error("Data could not be removed: " + error);
-                    alert("දත්ත මකා දැමීමේදී දෝෂයක් සිදුවිය. කරුණාකර නැවත උත්සාහ කරන්න.");
+        function getTodayDate() {
+            const today = new Date();
+            return today.toDateString();
+        }
+
+        function generateBarcodeId(prefectId) {
+            // Generate 6 random digits
+            let randomDigits = '';
+            for (let i = 0; i < 6; i++) {
+                randomDigits += Math.floor(Math.random() * 10);
+            }
+            return `${prefectId}-${randomDigits}`;
+        }
+
+        function showBarcodePopup(barcodeId) {
+            document.getElementById('generatedBarcode').textContent = barcodeId;
+            document.getElementById('barcodePopup').style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('barcodePopup').style.display = 'none';
+            document.getElementById('studentForm').reset();
+            // Hide copy success message
+            document.getElementById('copySuccess').classList.remove('show');
+        }
+
+        function copyBarcode() {
+            const barcodeText = document.getElementById('generatedBarcode').textContent;
+            
+            // Copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(barcodeText).then(() => {
+                    showCopySuccess();
+                }).catch(err => {
+                    fallbackCopy(barcodeText);
                 });
-        }
-    }
-
-    function downloadExcel() {
-        if (studentsData.length === 0) {
-            alert('Excel ගොනුවක් සෑදීමට දත්ත නොමැත!');
-            return;
+            } else {
+                fallbackCopy(barcodeText);
+            }
         }
 
-        const ws_data = [
-            ['No.', 'Full Name', 'Gender', 'Class', 'Barcode ID', 'Destiny', 'Email', 'Phone', 'Parents Phone', 'Current Duty', 'School Index Number', 'Prefect Unique ID', 'Section', 'Registration Date']
-        ];
+        function fallbackCopy(text) {
+            // Fallback method for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                alert('Barcode ID: ' + text + '\n\nPlease copy this manually.');
+            }
+            
+            document.body.removeChild(textArea);
+        }
 
-        studentsData.forEach((student, index) => {
-            ws_data.push([
-                index + 1,
-                student.name,
-                student.gender || 'N/A',
-                student.class,
-                student.barcode_id,
-                student.destiny,
-                student.email,
-                student.phone,
-                student.parents_phone,
-                student.current_duty,
-                student.school_index_number,
-                student.prefect_unique_id,
-                student.section,
-                student.dateTime
-            ]);
+        function showCopySuccess() {
+            const successMsg = document.getElementById('copySuccess');
+            successMsg.classList.add('show');
+            
+            // Hide success message after 2 seconds
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 2000);
+        }
+
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const dateTime = formatDateTime();
+            const prefectId = formData.get('prefect_unique_id');
+            const barcodeId = generateBarcodeId(prefectId);
+            
+            const studentData = {
+                id: Date.now(),
+                name: formData.get('name'),
+                gender: formData.get('gender'),
+                class: formData.get('class'),
+                barcode_id: barcodeId,
+                destiny: formData.get('destiny') || 'N/A',
+                email: formData.get('email') || 'N/A',
+                phone: formData.get('phone') || 'N/A',
+                parents_phone: formData.get('parents_phone') || 'N/A',
+                current_duty: formData.get('current_duty') || 'N/A',
+                school_index_number: formData.get('school_index_number') || 'N/A',
+                prefect_unique_id: prefectId,
+                section: formData.get('section') || 'N/A',
+                dateTime: dateTime,
+                registrationDate: getTodayDate()
+            };
+
+            studentsData.push(studentData);
+            localStorage.setItem('studentsData', JSON.stringify(studentsData));
+            
+            // Show barcode popup
+            showBarcodePopup(barcodeId);
         });
 
-        const ws = XLSX.utils.aoa_to_sheet(ws_data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Student Information");
+        function login() {
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                errorDiv.style.display = 'none';
+                updateAdminStats();
+                updateTable();
+            } else {
+                errorDiv.style.display = 'block';
+                document.getElementById('adminPassword').value = '';
+            }
+        }
 
-        // Auto-adjust column widths
-        const colWidths = [];
-        for (let i = 0; i < ws_data[0].length; i++) {
-            let maxLength = 0;
-            ws_data.forEach(row => {
-                if (row[i] && row[i].toString().length > maxLength) {
-                    maxLength = row[i].toString().length;
-                }
+        function updateAdminStats() {
+            const totalStudents = studentsData.length;
+            const todayDate = getTodayDate();
+            const todayCount = studentsData.filter(student => 
+                student.registrationDate === todayDate
+            ).length;
+
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('todayCount').textContent = todayCount;
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+            
+            if (studentsData.length === 0) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 14;
+                cell.textContent = 'No student information has been entered yet';
+                cell.style.textAlign = 'center';
+                cell.style.padding = '2rem';
+                cell.style.color = 'var(--primary-maroon)';
+                cell.style.fontStyle = 'italic';
+                return;
+            }
+            
+            studentsData.forEach((student, index) => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = index + 1;
+                row.insertCell(1).textContent = student.name;
+                row.insertCell(2).textContent = student.gender || 'N/A';
+                row.insertCell(3).textContent = student.class;
+                row.insertCell(4).textContent = student.barcode_id;
+                row.insertCell(5).textContent = student.destiny;
+                row.insertCell(6).textContent = student.email;
+                row.insertCell(7).textContent = student.phone;
+                row.insertCell(8).textContent = student.parents_phone;
+                row.insertCell(9).textContent = student.current_duty;
+                row.insertCell(10).textContent = student.school_index_number;
+                row.insertCell(11).textContent = student.prefect_unique_id;
+                row.insertCell(12).textContent = student.section;
+                row.insertCell(13).textContent = student.dateTime;
             });
-            colWidths.push({ wch: Math.max(maxLength + 2, 15) });
         }
-        ws['!cols'] = colWidths;
 
-        const today = new Date().toISOString().split('T')[0];
-        const fileName = `Student_Information_${today}.xlsx`;
-        XLSX.writeFile(wb, fileName);
-    }
-
-    // Enter key login
-    document.getElementById('adminPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            login();
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete all student information? This action cannot be undone!')) {
+                studentsData = [];
+                localStorage.removeItem('studentsData');
+                updateTable();
+                updateAdminStats();
+                alert('All data has been successfully deleted.');
+            }
         }
-    });
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        // මූලිකවම studentsData එක load කිරීමට අවශ්‍ය නැත, login වූ පසු එය auto-update වේ
-    });
+        function downloadExcel() {
+            if (studentsData.length === 0) {
+                alert('No data available to create Excel file!');
+                return;
+            }
 
-    // Header shrinking effect on scroll
-    let lastScrollTop = 0;
-    let ticking = false;
+            const ws_data = [
+                ['No.', 'Full Name', 'Gender', 'Class', 'Barcode ID', 'Destiny', 'Email', 'Phone', 'Parents Phone', 'Current Duty', 'School Index Number', 'Prefect Unique ID', 'Section', 'Registration Date']
+            ];
 
-    function updateHeaderOnScroll() {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const header = document.querySelector('.top-header');
-        
-        if (scrollTop > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
+            studentsData.forEach((student, index) => {
+                ws_data.push([
+                    index + 1,
+                    student.name,
+                    student.gender || 'N/A',
+                    student.class,
+                    student.barcode_id,
+                    student.destiny,
+                    student.email,
+                    student.phone,
+                    student.parents_phone,
+                    student.current_duty,
+                    student.school_index_number,
+                    student.prefect_unique_id,
+                    student.section,
+                    student.dateTime
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Student Information");
+
+            // Auto-adjust column widths
+            const colWidths = [];
+            for (let i = 0; i < ws_data[0].length; i++) {
+                let maxLength = 0;
+                ws_data.forEach(row => {
+                    if (row[i] && row[i].toString().length > maxLength) {
+                        maxLength = row[i].toString().length;
+                    }
+                });
+                colWidths.push({ wch: Math.max(maxLength + 2, 15) });
+            }
+            ws['!cols'] = colWidths;
+
+            const today = new Date().toISOString().split('T')[0];
+            const fileName = `Student_Information_${today}.xlsx`;
+            XLSX.writeFile(wb, fileName);
         }
-        
-        lastScrollTop = scrollTop;
-        ticking = false;
-    }
 
-    function requestHeaderUpdate() {
-        if (!ticking) {
-            requestAnimationFrame(updateHeaderOnScroll);
-            ticking = true;
+        // Enter key login
+        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (studentsData.length > 0) {
+                updateAdminStats();
+            }
+        });
+
+        // Header shrinking effect on scroll
+        let lastScrollTop = 0;
+        let ticking = false;
+
+        function updateHeaderOnScroll() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const header = document.querySelector('.top-header');
+            
+            if (scrollTop > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            lastScrollTop = scrollTop;
+            ticking = false;
         }
-    }
 
-    window.addEventListener('scroll', requestHeaderUpdate, { passive: true });
-</script>
+        function requestHeaderUpdate() {
+            if (!ticking) {
+                requestAnimationFrame(updateHeaderOnScroll);
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', requestHeaderUpdate, { passive: true });
+    </script>
 </body>
 </html>
