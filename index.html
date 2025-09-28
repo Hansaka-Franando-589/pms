@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-cream: #FFF8DC;
+            --light-cream: #FFFEF7;
+            --accent-cream: #F5E6A3;
+            --primary-maroon: #800020;
+            --dark-maroon: #5C0016;
+            --light-maroon: #A0002C;
+            --gradient-primary: linear-gradient(135deg, var(--primary-maroon) 0%, var(--dark-maroon) 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--accent-cream) 0%, var(--primary-cream) 100%);
+            --shadow-light: 0 4px 20px rgba(128, 0, 32, 0.1);
+            --shadow-medium: 0 8px 30px rgba(128, 0, 32, 0.15);
+            --shadow-heavy: 0 15px 50px rgba(128, 0, 32, 0.2);
+            --border-radius: 16px;
+            --border-radius-lg: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--light-cream) 0%, var(--primary-cream) 50%, var(--accent-cream) 100%);
+            min-height: 100vh;
+            padding: 0;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        /* Header with Logo Space */
+        .top-header {
+            background: var(--gradient-primary);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-medium);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .top-header.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-placeholder {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-cream);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary-maroon);
+            font-weight: 700;
+            border: 3px solid rgba(255, 248, 220, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .top-header.scrolled .logo-placeholder {
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+        }
+
+        .brand-text {
+            color: var(--primary-cream);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .brand-text h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .top-header.scrolled .brand-text h1 {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            margin-bottom: 0.1rem;
+        }
+
+        .brand-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 300;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .top-header.scrolled .brand-text p {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .admin-toggle {
+            background: rgba(255, 248, 220, 0.15);
+            color: var(--primary-cream);
+            border: 2px solid rgba(255, 248, 220, 0.3);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .top-header.scrolled .admin-toggle {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.75rem;
+        }
+
+        .admin-toggle:hover {
+            background: rgba(255, 248, 220, 0.25);
+            border-color: rgba(255, 248, 220, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-heavy);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(128, 0, 32, 0.1);
+        }
+
+        .main-header {
+            background: var(--gradient-secondary);
+            text-align: center;
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(128, 0, 32, 0.05), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) skewX(-15deg); }
+            100% { transform: translateX(200%) skewX(-15deg); }
+        }
+
+        .main-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 700;
+            color: var(--primary-maroon);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .main-header p {
+            font-size: 1.1rem;
+            color: var(--dark-maroon);
+            font-weight: 400;
+            position: relative;
+            z-index: 2;
+        }
+
+        .content {
+            padding: clamp(1.5rem, 5vw, 3rem);
+        }
+
+        /* Form Styling */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-maroon);
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid rgba(128, 0, 32, 0.2);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            background: rgba(255, 248, 220, 0.3);
+            color: var(--dark-maroon);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(128, 0, 32, 0.5);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-maroon);
+            background: rgba(255, 248, 220, 0.5);
+            box-shadow: 0 0 20px rgba(128, 0, 32, 0.1);
+            transform: translateY(-1px);
+        }
+
+        select option {
+            background: var(--primary-cream);
+            color: var(--primary-maroon);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: var(--primary-cream);
+            border: none;
+            padding: 1.25rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 248, 220, 0.2), transparent);
+            transition: all 0.6s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent-cream) 0%, var(--primary-cream) 100%);
+            color: var(--primary-maroon);
+            border: 2px solid var(--primary-maroon);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 0.75rem 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            background: var(--primary-maroon);
+            color: var(--primary-cream);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: var(--transition);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--primary-cream) 0%, var(--accent-cream) 100%);
+            color: var(--primary-maroon);
+            border: 2px solid var(--primary-maroon);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0.75rem 0.5rem;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            background: var(--primary-maroon);
+            color: var(--primary-cream);
+        }
+
+        /* Popup Styling */
+        .barcode-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .popup-content {
+            background: var(--gradient-secondary);
+            padding: clamp(1.5rem, 4vw, 2.5rem);
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-heavy);
+            animation: popupSlide 0.4s ease;
+            border: 2px solid var(--primary-maroon);
+            position: relative;
+        }
+
+        @keyframes popupSlide {
+            from {
+                transform: scale(0.8) translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .popup-title {
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary-maroon);
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            font-weight: 700;
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+            line-height: 1.2;
+        }
+
+        .barcode-display {
+            background: rgba(255, 255, 255, 0.6);
+            padding: clamp(1.5rem, 4vw, 2rem);
+            border-radius: var(--border-radius);
+            margin: clamp(1rem, 3vw, 1.5rem) 0;
+            border: 2px solid var(--primary-maroon);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .barcode-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(128, 0, 32, 0.1), transparent);
+            animation: scanAnimation 2s infinite;
+        }
+
+        @keyframes scanAnimation {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .barcode-code {
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            font-weight: 800;
+            color: var(--primary-maroon);
+            letter-spacing: clamp(1px, 2vw, 2px);
+            margin: 1rem 0;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            z-index: 2;
+            word-break: break-all;
+            line-height: 1.3;
+        }
+
+        .copy-btn {
+            background: var(--gradient-primary);
+            color: var(--primary-cream);
+            border: none;
+            padding: clamp(0.6rem, 2vw, 0.75rem) clamp(1.2rem, 3vw, 1.5rem);
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            font-weight: 600;
+            margin: clamp(0.75rem, 2vw, 1rem) clamp(0.5rem, 1.5vw, 0.75rem);
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: auto;
+            min-width: 120px;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .copy-success {
+            color: #059669;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            font-weight: 600;
+            margin-top: 1rem;
+            opacity: 0;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .copy-success.show {
+            opacity: 1;
+            transform: translateY(-5px);
+        }
+
+        .popup-message {
+            color: var(--dark-maroon);
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            line-height: 1.5;
+            margin: clamp(1rem, 3vw, 1.5rem) 0;
+            padding: 0 clamp(0.5rem, 2vw, 1rem);
+        }
+
+        .popup-close {
+            background: var(--gradient-primary);
+            color: var(--primary-cream);
+            border: none;
+            padding: clamp(0.8rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            font-weight: 600;
+            margin-top: clamp(1rem, 3vw, 1.5rem);
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .popup-close:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Admin Panel */
+        .login-form {
+            background: rgba(255, 248, 220, 0.3);
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
+            text-align: center;
+            border: 1px solid rgba(128, 0, 32, 0.2);
+        }
+
+        .login-form h2 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary-maroon);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 248, 220, 0.4);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            border: 2px solid rgba(128, 0, 32, 0.1);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--primary-maroon);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary-maroon);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--dark-maroon);
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Table Styling */
+        .students-table {
+            margin-top: 2rem;
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.9);
+            min-width: 1200px;
+        }
+
+        th {
+            background: var(--gradient-primary);
+            color: var(--primary-cream);
+            padding: 1rem 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid rgba(128, 0, 32, 0.1);
+            font-size: 0.9rem;
+            color: var(--dark-maroon);
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(255, 248, 220, 0.3);
+        }
+
+        tr:hover {
+            background-color: rgba(245, 230, 163, 0.4);
+            transition: var(--transition);
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gradient-primary);
+            color: var(--primary-cream);
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .contact-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            background: rgba(255, 248, 220, 0.2);
+            color: var(--primary-cream);
+            border: 2px solid rgba(255, 248, 220, 0.3);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 248, 220, 0.3);
+            border-color: var(--primary-cream);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 248, 220, 0.2);
+            padding-top: 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .logo-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .brand-text h1 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                margin: 1rem;
+                border-radius: var(--border-radius);
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .main-header {
+                padding: 2rem 1rem;
+            }
+
+            .main-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .contact-btn {
+                width: 200px;
+                justify-content: center;
+            }
+
+            .students-table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 1rem;
+            }
+
+            .main-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .btn-primary {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+
+            .popup-content {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            .barcode-code {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-cream);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-maroon);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-maroon);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header with Logo -->
+    <div class="top-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-placeholder">
+                    <!-- Replace this div with your actual logo -->
+                    📚
+                </div>
+                <div class="brand-text">
+                    <h1>Student Information System</h1>
+                    <p>Secure • Modern • Efficient</p>
+                </div>
+            </div>
+            <button class="admin-toggle" onclick="toggleAdmin()">👨‍🏫 Admin Panel</button>
+        </div>
+    </div>
+
+    <div class="container fade-in">
+        <div class="main-header">
+            <h2>🌟 Student Registration Portal</h2>
+            <p>Complete your registration with accurate information</p>
+        </div>
+
+        <div class="content">
+            <!-- Student Form Section -->
+            <div id="studentSection" class="student-form">
+                <form id="studentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required placeholder="Enter student's full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="class">Class *</label>
+                            <input type="text" id="class" name="class" placeholder="e.g. 10A, 11B" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prefect_unique_id">Prefect Unique ID *</label>
+                            <input type="text" id="prefect_unique_id" name="prefect_unique_id" required placeholder="Enter your unique prefect ID">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Gender *</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                                <option value="Prefer not to say">Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="destiny">Destiny</label>
+                            <select id="destiny" name="destiny">
+                                <option value="">Select Your Future Goal</option>
+                                <option value="Doctor">Doctor</option>
+                                <option value="Engineer">Engineer</option>
+                                <option value="Teacher">Teacher</option>
+                                <option value="Lawyer">Lawyer</option>
+                                <option value="Business Person">Business Person</option>
+                                <option value="Artist">Artist</option>
+                                <option value="Scientist">Scientist</option>
+                                <option value="Military Officer">Military Officer</option>
+                                <option value="Police Officer">Police Officer</option>
+                                <option value="Pilot">Pilot</option>
+                                <option value="Accountant">Accountant</option>
+                                <option value="Pharmacist">Pharmacist</option>
+                                <option value="Nurse">Nurse</option>
+                                <option value="Architect">Architect</option>
+                                <option value="IT Professional">IT Professional</option>
+                                <option value="Journalist">Journalist</option>
+                                <option value="Chef">Chef</option>
+                                <option value="Sports Person">Sports Person</option>
+                                <option value="Musician">Musician</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="student@example.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+94 77 123 4567">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="parents_phone">Parent's Phone Number</label>
+                            <input type="tel" id="parents_phone" name="parents_phone" placeholder="+94 77 123 4567">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="current_duty">Current Duty</label>
+                            <select id="current_duty" name="current_duty">
+                                <option value="">Select Current Duty</option>
+                                <option value="Head Prefect">Head Prefect</option>
+                                <option value="Deputy Head Prefect">Deputy Head Prefect</option>
+                                <option value="House Captain">House Captain</option>
+                                <option value="Vice House Captain">Vice House Captain</option>
+                                <option value="Sports Captain">Sports Captain</option>
+                                <option value="Library Prefect">Library Prefect</option>
+                                <option value="Discipline Prefect">Discipline Prefect</option>
+                                <option value="Academic Prefect">Academic Prefect</option>
+                                <option value="Cultural Prefect">Cultural Prefect</option>
+                                <option value="Environment Prefect">Environment Prefect</option>
+                                <option value="Health Prefect">Health Prefect</option>
+                                <option value="Media Prefect">Media Prefect</option>
+                                <option value="Technology Prefect">Technology Prefect</option>
+                                <option value="Junior Prefect">Junior Prefect</option>
+                                <option value="Senior Prefect">Senior Prefect</option>
+                                <option value="Class Representative">Class Representative</option>
+                                <option value="Club Leader">Club Leader</option>
+                                <option value="Society President">Society President</option>
+                                <option value="Other">Other</option>
+                                <option value="No Current Duty">No Current Duty</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="school_index_number">School Index Number</label>
+                            <input type="text" id="school_index_number" name="school_index_number" placeholder="School registration number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="section">Section</label>
+                            <select id="section" name="section">
+                                <option value="">Select Section</option>
+                                <option value="Science">Science Stream</option>
+                                <option value="Commerce">Commerce Stream</option>
+                                <option value="Arts">Arts Stream</option>
+                                <option value="Technology">Technology Stream</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Submit Information</button>
+                </form>
+
+                <!-- Barcode Popup -->
+                <div id="barcodePopup" class="barcode-popup">
+                    <div class="popup-content">
+                        <div class="popup-title">🎉 Registration Successful!</div>
+                        <p style="color: var(--dark-maroon); margin-bottom: 1rem;">Your information has been successfully recorded in our system</p>
+                        
+                        <div class="barcode-display">
+                            <div style="font-size: 1.1rem; color: var(--primary-maroon); margin-bottom: 1rem; font-weight: 600;">🏷️ Your Unique Barcode ID:</div>
+                            <div id="generatedBarcode" class="barcode-code"></div>
+                            <button onclick="copyBarcode()" class="copy-btn">📋 Copy Code</button>
+                            <div id="copySuccess" class="copy-success">✅ Successfully Copied to Clipboard!</div>
+                        </div>
+                        
+                        <p style="color: var(--dark-maroon); font-size: 0.9rem; margin: 1rem 0;">
+                            <strong>⚠️ Important:</strong> Please save this barcode ID securely for future reference.
+                        </p>
+                        
+                        <button onclick="closePopup()" class="btn-primary">Got It!</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Panel Section -->
+            <div id="adminPanel" class="admin-panel" style="display: none;">
+                <div id="loginForm" class="login-form">
+                    <h2>👨‍🏫 Admin Access Panel</h2>
+                    <div id="loginError" class="error-message" style="display: none;">
+                        Incorrect Password! Please try again.
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">Administrator Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter admin password">
+                    </div>
+                    <button onclick="login()" class="btn-primary">Access Dashboard</button>
+                </div>
+
+                <div id="adminDashboard" style="display: none;">
+                    <h2 style="color: var(--primary-maroon); font-family: 'Poppins', sans-serif; text-align: center; margin-bottom: 2rem; font-weight: 700;">👨‍🏫 Administrator Dashboard</h2>
+                    
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalStudents">0</div>
+                            <div class="stat-label">Total Students</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="todayCount">0</div>
+                            <div class="stat-label">Today's Registrations</div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin: 2rem 0;">
+                        <button onclick="downloadExcel()" class="btn-download">📊 Download Excel Report</button>
+                        <button onclick="clearAllData()" class="btn-danger" style="margin-left: 1rem;">🗑️ Clear All Data</button>
+                    </div>
+
+                    <div class="students-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Class</th>
+                                    <th>Barcode ID</th>
+                                    <th>Destiny</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Parents Phone</th>
+                                    <th>Current Duty</th>
+                                    <th>School Number</th>
+                                    <th>Prefect ID</th>
+                                    <th>Section</th>
+                                    <th>Registration Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button onclick="backToStudentForm()" class="btn-secondary" style="margin-top: 2rem;">🔙 Back to Student Form</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-content">
+            <h3>🌟 Student Information System</h3>
+            <p style="font-weight: 300; margin-bottom: 1rem;">Manage your student data securely and efficiently</p>
+            
+            <div class="contact-buttons">
+                <a href="https://wa.me/+94771234567" class="contact-btn whatsapp" target="_blank">
+                    📱 WhatsApp
+                </a>
+                <a href="mailto:info@school.lk" class="contact-btn email" target="_blank">
+                    ✉️ Email
+                </a>
+                <a href="tel:+94771234567" class="contact-btn phone">
+                    📞 Phone
+                </a>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 Student Information System. All rights reserved.</p>
+                <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.5rem;">
+                    Developed with ❤️ for Education | Version 4.0
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "admin123"; // Change your admin password here
+        let studentsData = JSON.parse(localStorage.getItem('studentsData')) || [];
+
+        function toggleAdmin() {
+            const studentSection = document.getElementById('studentSection');
+            const adminPanel = document.getElementById('adminPanel');
+            
+            if (studentSection.style.display === 'none') {
+                studentSection.style.display = 'block';
+                adminPanel.style.display = 'none';
+            } else {
+                studentSection.style.display = 'none';
+                adminPanel.style.display = 'block';
+            }
+        }
+
+        function backToStudentForm() {
+            document.getElementById('studentSection').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            // Reset admin panel
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        function formatDateTime() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            };
+            return now.toLocaleString('en-US', options);
+        }
+
+        function getTodayDate() {
+            const today = new Date();
+            return today.toDateString();
+        }
+
+        function generateBarcodeId(prefectId) {
+            // Generate 6 random digits
+            let randomDigits = '';
+            for (let i = 0; i < 6; i++) {
+                randomDigits += Math.floor(Math.random() * 10);
+            }
+            return `${prefectId}-${randomDigits}`;
+        }
+
+        function showBarcodePopup(barcodeId) {
+            document.getElementById('generatedBarcode').textContent = barcodeId;
+            document.getElementById('barcodePopup').style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('barcodePopup').style.display = 'none';
+            document.getElementById('studentForm').reset();
+            // Hide copy success message
+            document.getElementById('copySuccess').classList.remove('show');
+        }
+
+        function copyBarcode() {
+            const barcodeText = document.getElementById('generatedBarcode').textContent;
+            
+            // Copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(barcodeText).then(() => {
+                    showCopySuccess();
+                }).catch(err => {
+                    fallbackCopy(barcodeText);
+                });
+            } else {
+                fallbackCopy(barcodeText);
+            }
+        }
+
+        function fallbackCopy(text) {
+            // Fallback method for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                alert('Barcode ID: ' + text + '\n\nPlease copy this manually.');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess() {
+            const successMsg = document.getElementById('copySuccess');
+            successMsg.classList.add('show');
+            
+            // Hide success message after 2 seconds
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 2000);
+        }
+
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const dateTime = formatDateTime();
+            const prefectId = formData.get('prefect_unique_id');
+            const barcodeId = generateBarcodeId(prefectId);
+            
+            const studentData = {
+                id: Date.now(),
+                name: formData.get('name'),
+                gender: formData.get('gender'),
+                class: formData.get('class'),
+                barcode_id: barcodeId,
+                destiny: formData.get('destiny') || 'N/A',
+                email: formData.get('email') || 'N/A',
+                phone: formData.get('phone') || 'N/A',
+                parents_phone: formData.get('parents_phone') || 'N/A',
+                current_duty: formData.get('current_duty') || 'N/A',
+                school_index_number: formData.get('school_index_number') || 'N/A',
+                prefect_unique_id: prefectId,
+                section: formData.get('section') || 'N/A',
+                dateTime: dateTime,
+                registrationDate: getTodayDate()
+            };
+
+            studentsData.push(studentData);
+            localStorage.setItem('studentsData', JSON.stringify(studentsData));
+            
+            // Show barcode popup
+            showBarcodePopup(barcodeId);
+        });
+
+        function login() {
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                errorDiv.style.display = 'none';
+                updateAdminStats();
+                updateTable();
+            } else {
+                errorDiv.style.display = 'block';
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function updateAdminStats() {
+            const totalStudents = studentsData.length;
+            const todayDate = getTodayDate();
+            const todayCount = studentsData.filter(student => 
+                student.registrationDate === todayDate
+            ).length;
+
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('todayCount').textContent = todayCount;
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+            
+            if (studentsData.length === 0) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 14;
+                cell.textContent = 'No student information has been entered yet';
+                cell.style.textAlign = 'center';
+                cell.style.padding = '2rem';
+                cell.style.color = 'var(--primary-maroon)';
+                cell.style.fontStyle = 'italic';
+                return;
+            }
+            
+            studentsData.forEach((student, index) => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = index + 1;
+                row.insertCell(1).textContent = student.name;
+                row.insertCell(2).textContent = student.gender || 'N/A';
+                row.insertCell(3).textContent = student.class;
+                row.insertCell(4).textContent = student.barcode_id;
+                row.insertCell(5).textContent = student.destiny;
+                row.insertCell(6).textContent = student.email;
+                row.insertCell(7).textContent = student.phone;
+                row.insertCell(8).textContent = student.parents_phone;
+                row.insertCell(9).textContent = student.current_duty;
+                row.insertCell(10).textContent = student.school_index_number;
+                row.insertCell(11).textContent = student.prefect_unique_id;
+                row.insertCell(12).textContent = student.section;
+                row.insertCell(13).textContent = student.dateTime;
+            });
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete all student information? This action cannot be undone!')) {
+                studentsData = [];
+                localStorage.removeItem('studentsData');
+                updateTable();
+                updateAdminStats();
+                alert('All data has been successfully deleted.');
+            }
+        }
+
+        function downloadExcel() {
+            if (studentsData.length === 0) {
+                alert('No data available to create Excel file!');
+                return;
+            }
+
+            const ws_data = [
+                ['No.', 'Full Name', 'Gender', 'Class', 'Barcode ID', 'Destiny', 'Email', 'Phone', 'Parents Phone', 'Current Duty', 'School Index Number', 'Prefect Unique ID', 'Section', 'Registration Date']
+            ];
+
+            studentsData.forEach((student, index) => {
+                ws_data.push([
+                    index + 1,
+                    student.name,
+                    student.gender || 'N/A',
+                    student.class,
+                    student.barcode_id,
+                    student.destiny,
+                    student.email,
+                    student.phone,
+                    student.parents_phone,
+                    student.current_duty,
+                    student.school_index_number,
+                    student.prefect_unique_id,
+                    student.section,
+                    student.dateTime
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Student Information");
+
+            // Auto-adjust column widths
+            const colWidths = [];
+            for (let i = 0; i < ws_data[0].length; i++) {
+                let maxLength = 0;
+                ws_data.forEach(row => {
+                    if (row[i] && row[i].toString().length > maxLength) {
+                        maxLength = row[i].toString().length;
+                    }
+                });
+                colWidths.push({ wch: Math.max(maxLength + 2, 15) });
+            }
+            ws['!cols'] = colWidths;
+
+            const today = new Date().toISOString().split('T')[0];
+            const fileName = `Student_Information_${today}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // Enter key login
+        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (studentsData.length > 0) {
+                updateAdminStats();
+            }
+        });
+
+        // Header shrinking effect on scroll
+        let lastScrollTop = 0;
+        let ticking = false;
+
+        function updateHeaderOnScroll() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const header = document.querySelector('.top-header');
+            
+            if (scrollTop > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            lastScrollTop = scrollTop;
+            ticking = false;
+        }
+
+        function requestHeaderUpdate() {
+            if (!ticking) {
+                requestAnimationFrame(updateHeaderOnScroll);
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', requestHeaderUpdate, { passive: true });
+    </script>
+</body>
+</html>
