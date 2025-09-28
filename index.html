@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Information System</title>
+    <link rel="shortcut icon" href="meroon Transparent logo prefect.png" type="image/png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -801,9 +802,67 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--dark-maroon);
         }
+
+        /* Preloader Styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-cream);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .preloader-content {
+            text-align: center;
+        }
+
+        .preloader-logo {
+            width: 100px;
+            height: 100px;
+            animation: pulse 2s infinite;
+            margin-bottom: 2rem;
+        }
+
+        .preloader-text {
+            color: var(--primary-maroon);
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="meroon Transparent logo prefect.png" alt="Logo" class="preloader-logo">
+            <div id="preloader-text" class="preloader-text">Please wait...</div>
+        </div>
+    </div>
     <!-- Top Header with Logo -->
     <div class="top-header">
         <div class="header-content">
@@ -887,26 +946,11 @@
                             <label for="current_duty">Current Duty</label>
                             <select id="current_duty" name="current_duty">
                                 <option value="">Select Current Duty</option>
-                                <option value="Head Prefect">Head Prefect</option>
-                                <option value="Deputy Head Prefect">Deputy Head Prefect</option>
-                                <option value="House Captain">House Captain</option>
-                                <option value="Vice House Captain">Vice House Captain</option>
-                                <option value="Sports Captain">Sports Captain</option>
-                                <option value="Library Prefect">Library Prefect</option>
-                                <option value="Discipline Prefect">Discipline Prefect</option>
-                                <option value="Academic Prefect">Academic Prefect</option>
-                                <option value="Cultural Prefect">Cultural Prefect</option>
-                                <option value="Environment Prefect">Environment Prefect</option>
-                                <option value="Health Prefect">Health Prefect</option>
-                                <option value="Media Prefect">Media Prefect</option>
-                                <option value="Technology Prefect">Technology Prefect</option>
-                                <option value="Junior Prefect">Junior Prefect</option>
-                                <option value="Senior Prefect">Senior Prefect</option>
-                                <option value="Class Representative">Class Representative</option>
-                                <option value="Club Leader">Club Leader</option>
-                                <option value="Society President">Society President</option>
-                                <option value="Other">Other</option>
-                                <option value="No Current Duty">No Current Duty</option>
+                                <option value="Near the Log books">Near the Log books</option>
+                                <option value="Main Gate">Main Gate</option>
+                                <option value="Section">Section</option>
+                                <option value="Class">Class</option>
+                                <option value="Near Primary gate">Near Primary gate</option>
                             </select>
                         </div>
 
@@ -923,7 +967,8 @@
                                 <option value="Commerce">Commerce Stream</option>
                                 <option value="Arts">Arts Stream</option>
                                 <option value="Technology">Technology Stream</option>
-                                <option value="Other">Other</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
                             </select>
                         </div>
                     </div>
@@ -931,32 +976,13 @@
                     <button type="submit" class="btn-primary">Submit Information</button>
                 </form>
 
-                <!-- Barcode Popup -->
-                <div id="barcodePopup" class="barcode-popup">
-                    <div class="popup-content">
-                        <div class="popup-title">🎉 Registration Successful!</div>
-                        <p style="color: var(--dark-maroon); margin-bottom: 1rem;">Your information has been successfully recorded in our system</p>
-                        
-                        <div class="barcode-display">
-                            <div style="font-size: 1.1rem; color: var(--primary-maroon); margin-bottom: 1rem; font-weight: 600;">🏷️ Your Unique Barcode ID:</div>
-                            <div id="generatedBarcode" class="barcode-code"></div>
-                            <button onclick="copyBarcode()" class="copy-btn">📋 Copy Code</button>
-                            <div id="copySuccess" class="copy-success">✅ Successfully Copied to Clipboard!</div>
-                        </div>
-                        
-                        <p style="color: var(--dark-maroon); font-size: 0.9rem; margin: 1rem 0;">
-                            <strong>⚠️ Important:</strong> Please save this barcode ID securely for future reference.
-                        </p>
-                        
-                        <button onclick="closePopup()" class="btn-primary">Got It!</button>
-                    </div>
-                </div>
+
             </div>
 
             <!-- Admin Panel Section -->
             <div id="adminPanel" class="admin-panel" style="display: none;">
                 <div id="loginForm" class="login-form">
-                    <h2>👨‍🏫 Admin Access Panel</h2>
+                    <h2>Admin Access Panel</h2>
                     <div id="loginError" class="error-message" style="display: none;">
                         Incorrect Password! Please try again.
                     </div>
@@ -1020,25 +1046,25 @@
     <!-- Footer -->
     <div class="footer">
         <div class="footer-content">
-            <h3>🌟 Student Information System</h3>
+            <h3>Prefects Information System</h3>
             <p style="font-weight: 300; margin-bottom: 1rem;">Manage your student data securely and efficiently</p>
             
             <div class="contact-buttons">
-                <a href="https://wa.me/+94771234567" class="contact-btn whatsapp" target="_blank">
+                <a href="https://chat.whatsapp.com/C4aXtP8cV1QD2VwJ6EgEIK" class="contact-btn whatsapp" target="_blank">
                     📱 WhatsApp
                 </a>
-                <a href="mailto:info@school.lk" class="contact-btn email" target="_blank">
+                <a href="emmvprefects@gmail.com" class="contact-btn email" target="_blank">
                     ✉️ Email
                 </a>
-                <a href="tel:+94771234567" class="contact-btn phone">
+                <a href="tel:+94779912589" class="contact-btn phone">
                     📞 Phone
                 </a>
             </div>
             
             <div class="copyright">
-                <p>&copy; 2025 Student Information System. All rights reserved.</p>
+                <p>&copy; 2025 Prefect Information System. All rights reserved.</p>
                 <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.5rem;">
-                    Developed with ❤️ for Education | Version 4.0
+                    Developed with Firebase Database | Version 4.0
                 </div>
             </div>
         </div>
@@ -1069,7 +1095,7 @@
     </script>
 
     <script>
-        const ADMIN_PASSWORD = "admin123"; // Change your admin password here
+        const ADMIN_PASSWORD = "2444"; // Change your admin password here
         let studentsData = []; // This will be populated from Firebase
 
         function toggleAdmin() {
@@ -1121,64 +1147,18 @@
             return `${prefectId}-${randomDigits}`;
         }
 
-        function showBarcodePopup(barcodeId) {
-            document.getElementById('generatedBarcode').textContent = barcodeId;
-            document.getElementById('barcodePopup').style.display = 'flex';
-        }
-
-        function closePopup() {
-            document.getElementById('barcodePopup').style.display = 'none';
-            document.getElementById('studentForm').reset();
-            // Hide copy success message
-            document.getElementById('copySuccess').classList.remove('show');
-        }
-
-        function copyBarcode() {
-            const barcodeText = document.getElementById('generatedBarcode').textContent;
-            
-            // Copy to clipboard
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(barcodeText).then(() => {
-                    showCopySuccess();
-                }).catch(err => {
-                    fallbackCopy(barcodeText);
-                });
-            } else {
-                fallbackCopy(barcodeText);
-            }
-        }
-
-        function fallbackCopy(text) {
-            // Fallback method for older browsers
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                document.execCommand('copy');
-                showCopySuccess();
-            } catch (err) {
-                alert('Barcode ID: ' + text + '\n\nPlease copy this manually.');
-            }
-            
-            document.body.removeChild(textArea);
-        }
-
-        function showCopySuccess() {
-            const successMsg = document.getElementById('copySuccess');
-            successMsg.classList.add('show');
-            
-            // Hide success message after 2 seconds
-            setTimeout(() => {
-                successMsg.classList.remove('show');
-            }, 2000);
-        }
+        // The showBarcodePopup, closePopup, copyBarcode, fallbackCopy, showCopySuccess functions are no longer needed here
+        // as the barcode display is now a separate page.
 
         document.getElementById('studentForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            const submitButton = this.querySelector('.btn-primary');
+            
+            // Show loading indicator and disable button
+            submitButton.disabled = true; // Disable button to prevent multiple submissions
+            submitButton.textContent = 'Saving...'; // Change button text
+
             const formData = new FormData(this);
             const dateTime = formatDateTime();
             const prefectId = formData.get('prefect_unique_id');
@@ -1201,17 +1181,24 @@
                 registrationDate: getTodayDate()
             };
 
-            // Push data to Firebase
-            const newStudentRef = database.ref('students').push();
-            newStudentRef.set(studentData)
-                .then(() => {
-                    // Show barcode popup
-                    showBarcodePopup(barcodeId);
-                })
-                .catch((error) => {
-                    console.error("Error saving data to Firebase:", error);
-                    alert("There was an error saving the data. Please try again.");
-                });
+            // Simulate a delay for loading (e.g., 2 seconds)
+            setTimeout(() => {
+                // Push data to Firebase
+                const newStudentRef = database.ref('students').push();
+                newStudentRef.set(studentData)
+                    .then(() => {
+                        // Redirect to barcode_display.html with barcodeId
+                        window.location.href = `barcode_display.html?barcodeId=${barcodeId}`;
+                    })
+                    .catch((error) => {
+                        console.error("Error saving data to Firebase:", error);
+                        alert("There was an error saving the data. Please try again.");
+                    })
+                    .finally(() => {
+                        submitButton.disabled = false; // Re-enable button
+                        submitButton.textContent = 'Submit Information'; // Reset button text
+                    });
+            }, 2000); // 2-second simulated loading time
         });
 
         function login() {
@@ -1393,5 +1380,35 @@
 
         window.addEventListener('scroll', requestHeaderUpdate, { passive: true });
     </script>
+
+    <script>
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            const preloaderText = document.getElementById('preloader-text');
+            const messages = ["Please wait...", "Initializing...", "Almost Done..."];
+            let messageIndex = 0; // "Please wait..." is already displayed from HTML
+
+            const updateMessage = () => {
+                messageIndex++; // Move to the next message
+                if (preloaderText) {
+                    preloaderText.style.opacity = 0; // Start fade out
+                    setTimeout(() => {
+                        preloaderText.textContent = messages[messageIndex % messages.length]; // Cycle through messages
+                        preloaderText.style.opacity = 1; // Fade in
+                    }, 500); // Match CSS transition duration
+                }
+            };
+
+            // Change text every 2 seconds, starting after the first 2 seconds
+            const textInterval = setInterval(updateMessage, 2000);
+
+            // Hide preloader after 6 seconds
+            setTimeout(() => {
+                clearInterval(textInterval); // Stop changing text
+                if (preloader) {
+                    preloader.classList.add('hidden');
+                }
+            }, 6000);
+        });
+    </script>
 </body>
-</html>
