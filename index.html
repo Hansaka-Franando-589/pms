@@ -863,13 +863,11 @@
             <div id="preloader-text" class="preloader-text">Please wait...</div>
         </div>
     </div>
-    <!-- Top Header with Logo -->
     <div class="top-header">
         <div class="header-content">
             <div class="logo-section">
                 <div class="logo-placeholder">
-                    <!-- Replace this div with your actual logo -->
-                     <img src="meroon Transparent logo prefect.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
+                    <img src="meroon Transparent logo prefect.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
                 </div>
                 <div class="brand-text">
                     <h1>ECC PREFECTS' GUILD</h1>
@@ -887,7 +885,6 @@
         </div>
 
         <div class="content">
-            <!-- Student Form Section -->
             <div id="studentSection" class="student-form">
                 <form id="studentForm">
                     <div class="form-grid">
@@ -980,7 +977,6 @@
 
             </div>
 
-            <!-- Admin Panel Section -->
             <div id="adminPanel" class="admin-panel" style="display: none;">
                 <div id="loginForm" class="login-form">
                     <h2>Admin Access Panel</h2>
@@ -1008,8 +1004,9 @@
                         </div>
                     </div>
 
-                    <div style="text-align: center; margin: 2rem 0;">
+                    <div style="text-align: center; margin: 2rem 0; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
                         <button onclick="downloadExcel()" class="btn-download">📊 Download Excel Report</button>
+                        <button onclick="clearAllData()" class="btn-danger" style="padding: 1rem 2rem; border-radius: 50px; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">🗑️ Clear All Data</button>
                     </div>
 
                     <div class="students-table">
@@ -1030,6 +1027,7 @@
                                     <th>Prefect ID</th>
                                     <th>Section</th>
                                     <th>Registration Date</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="studentsTableBody">
@@ -1043,7 +1041,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
         <div class="footer-content">
             <h3>Prefects Information System</h3>
@@ -1070,7 +1067,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -1082,7 +1078,7 @@
         authDomain: "pms-application-4d101.firebaseapp.com",
         databaseURL: "https://pms-application-4d101-default-rtdb.asia-southeast1.firebasedatabase.app",
         projectId: "pms-application-4d101",
-        storageBucket: "pms-application-4d101.firebasestorage.app",
+        storageBucket: "pms-application-4d101.appspot.com",
         messagingSenderId: "602606496393",
         appId: "1:602606496393:web:3291e06e795007da50f458",
         measurementId: "G-8JXG6LPLXY"
@@ -1146,9 +1142,6 @@
             }
             return `${prefectId}-${randomDigits}`;
         }
-
-        // The showBarcodePopup, closePopup, copyBarcode, fallbackCopy, showCopySuccess functions are no longer needed here
-        // as the barcode display is now a separate page.
 
         document.getElementById('studentForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1237,7 +1230,8 @@
             if (studentsData.length === 0) {
                 const row = tbody.insertRow();
                 const cell = row.insertCell(0);
-                cell.colSpan = 14;
+                // ✅ ACTION: Updated colSpan to 15 to include the new Actions column
+                cell.colSpan = 15;
                 cell.textContent = 'No student information has been entered yet';
                 cell.style.textAlign = 'center';
                 cell.style.padding = '2rem';
@@ -1262,7 +1256,26 @@
                 row.insertCell(11).textContent = student.prefect_unique_id;
                 row.insertCell(12).textContent = student.section;
                 row.insertCell(13).textContent = student.dateTime;
+
+                // ✅ ACTION: Add a new cell for the delete button
+                const actionCell = row.insertCell(14);
+                actionCell.innerHTML = `<button onclick="deleteStudent('${student.id}')" class="btn-danger">Delete</button>`;
             });
+        }
+
+        // ✅ ACTION: New function to delete a single student record
+        function deleteStudent(studentId) {
+            if (confirm('Are you sure you want to permanently delete this student record?')) {
+                database.ref('students/' + studentId).remove()
+                    .then(() => {
+                        alert('Student record deleted successfully.');
+                        // The 'on' listener will automatically refresh the table.
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting student:", error);
+                        alert("Failed to delete student record. Please try again.");
+                    });
+            }
         }
 
         function clearAllData() {
@@ -1340,7 +1353,7 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             const studentsRef = database.ref('students');
-    
+        
             studentsRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 studentsData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
@@ -1412,9 +1425,4 @@
         });
     </script>
 </body>
-
-
-
-
-
-
+</html>
